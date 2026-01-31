@@ -45,6 +45,6 @@ void Output::frame_handler(struct wl_listener *listener, void *data)
 		std::cout<<"output->wlroots_output != data, this should not happen"<<std::endl;
 		return;
 	}
-	std::cout<<"vsync"<<std::endl;
+	//std::cout<<"vsync"<<std::endl;
 	output->frame_render();
 }

@@ -1,4 +1,5 @@
 #include "scaler.hpp"
+#include <cstring>
 
 Scaler::Scaler(int width, int height)
 {
@@ -21,5 +22,6 @@ Scaler::~Scaler()
 
 void Scaler::scale()
 {
-	// nop
+	// copy
+	memcpy(this->output, this->input, this->width*this->height*4);
 }

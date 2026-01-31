@@ -33,13 +33,10 @@ void Output::render_texture_to_output(wlr_texture *texture)
 
 	wlr_render_pass_submit(pass);
 
-	std::cout<<"wlr_output_test_state...";
-	if(wlr_output_test_state(this->wlroots_output, &state)) std::cout<<"OK"<<std::endl;
-	else std::cout<<"Failed"<<std::endl;
 
-	std::cout<<"wlr_output_commit_state...";
-	if(wlr_output_commit_state(this->wlroots_output, &state)) std::cout<<"OK"<<std::endl;
-	else std::cout<<"Failed"<<std::endl;
+	if(wlr_output_test_state(this->wlroots_output, &state) == false) throw 1;
+
+	if(wlr_output_commit_state(this->wlroots_output, &state) == false) throw 1;
 
 	wlr_output_state_finish(&state);
 }

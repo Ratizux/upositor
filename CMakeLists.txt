@@ -20,8 +20,8 @@ pkg_check_modules(WLROOTS REQUIRED IMPORTED_TARGET
 )
 
 add_executable(Main
+    src/keyboard.cpp
     src/main.cpp
-    src/server.cpp
     src/output.cpp
     src/output_frame_handler.cpp
     src/output_frame_render.cpp
@@ -29,6 +29,8 @@ add_executable(Main
     src/output_render_texture_to_output.cpp
     src/outputsurface.cpp
     src/scaler.cpp
+    src/server.cpp
+    src/toplevel.cpp
 )
 
 target_include_directories(Main PRIVATE
@@ -38,7 +40,8 @@ target_include_directories(Main PRIVATE
 target_link_libraries(Main PRIVATE PkgConfig::WAYLAND PkgConfig::WLROOTS)
 target_compile_options(Main PRIVATE
     #-fsanitize=undefined -fsanitize=address -fno-omit-frame-pointer
-    -O2
+    -Wall
+    #-O2
 )
 target_link_options(Main PRIVATE
     #-fsanitize=undefined -fsanitize=address

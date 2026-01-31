@@ -1,5 +1,6 @@
 #include "output.hpp"
 #include "outputsurface.hpp"
+#include "toplevel.hpp"
 
 void Output::render_surfaces_to_buffer(wlr_buffer *buffer)
 {
@@ -20,10 +21,16 @@ void Output::render_surfaces_to_buffer(wlr_buffer *buffer)
 		wlr_render_pass_add_rect(pass, &options);
 	}
 
-	std::cout<<"Surfaces: "<<this->surfaces.size()<<std::endl;
-	for(auto surface:this->surfaces)
+	//std::cout<<"Surfaces: "<<this->surfaces.size()<<std::endl;
+
+	for(auto toplevel:this->parent->toplevels)
 	{
-		std::cout<<"Render "<<(void*)surface<<std::endl;
+		if(toplevel->ready == false)
+		{
+			std::cerr<<"Skipping incompleted toplevels";
+			continue;
+		}
+		//std::cout<<"Render "<<(void*)surface<<std::endl;
 		struct render_helper_data
 		{
 			struct timespec *time;
@@ -53,9 +60,8 @@ void Output::render_surfaces_to_buffer(wlr_buffer *buffer)
 			.time = &now,
 			.pass = pass,
 		};
-		function(surface->wlroots_surface, 0, 0, &data);
+		wlr_surface *wlroots_surface = toplevel->wlroots_xdg_toplevel->base->surface;
+		function(wlroots_surface, 0, 0, &data);
 	}
-	std::cout<<"wlr_render_pass_submit...";
-	if(wlr_render_pass_submit(pass)) std::cout<<"OK"<<std::endl;
-	else std::cout<<"Failed"<<std::endl;
+	if(wlr_render_pass_submit(pass) == false) throw 1;
 }

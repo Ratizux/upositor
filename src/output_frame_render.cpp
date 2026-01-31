@@ -22,38 +22,11 @@ void Output::frame_render()
 	const wlr_drm_format *target_format = wlr_drm_format_set_get(wlr_output_get_primary_formats(this->wlroots_output, WLR_BUFFER_CAP_DMABUF), DRM_FORMAT_ABGR8888);
 
 	wlr_buffer *intermediate = wlr_allocator_create_buffer(this->parent->allocator, width, height, target_format);
-	std::cout<<"Locks: "<<intermediate->n_locks<<std::endl;
-	std::cout<<intermediate->width<<"x"<<intermediate->height<<std::endl;
+	//std::cout<<"Locks: "<<intermediate->n_locks<<std::endl;
+	//std::cout<<intermediate->width<<"x"<<intermediate->height<<std::endl;
 
 	// don't touch output, render to an offscreen buffer
 	this->render_surfaces_to_buffer(intermediate);
-
-	wlr_dmabuf_attributes attrs = {0};
-	if(wlr_buffer_get_dmabuf(intermediate, &attrs))
-	{
-		std::cout<<"Get DMABUF OK"<<std::endl;
-		std::cout<<(attrs.format == DRM_FORMAT_ABGR8888)<<std::endl;
-		std::cout<<attrs.n_planes<<std::endl;
-		int size = attrs.width*attrs.height*4;
-		std::cout<<attrs.width<<"x"<<attrs.height<<std::endl;
-		std::cout<<attrs.stride[0]<<std::endl;
-		std::cout<<IS_AMD_FMT_MOD(attrs.modifier)<<std::endl;
-		std::cout<<size<<std::endl;
-
-		uint32_t *data = nullptr;
-		data = static_cast<uint32_t*>(mmap(nullptr, size, PROT_READ, MAP_SHARED, attrs.fd[0], attrs.offset[0]));
-		if(data != MAP_FAILED)
-		{
-			std::cout<<"mmap OK"<<std::endl;
-			munmap(data, size);
-		}
-		else
-		{
-			std::cout<<"mmap failed: "<<strerror(errno)<<std::endl;
-		}
-	}
-
-	std::cout<<"Locks: "<<intermediate->n_locks<<std::endl;
 
 	// tamper with the buffer
 	Scaler scaler(width/2, height/2);
@@ -89,3 +62,30 @@ void Output::frame_render()
 
 	wlr_texture_destroy(target_texture);
 }
+
+/*wlr_dmabuf_attributes attrs = {0};
+	if(wlr_buffer_get_dmabuf(intermediate, &attrs))
+	{
+		//std::cout<<"Get DMABUF OK"<<std::endl;
+		//std::cout<<(attrs.format == DRM_FORMAT_ABGR8888)<<std::endl;
+		//std::cout<<attrs.n_planes<<std::endl;
+		int size = attrs.width*attrs.height*4;
+		//std::cout<<attrs.width<<"x"<<attrs.height<<std::endl;
+		//std::cout<<attrs.stride[0]<<std::endl;
+		//std::cout<<IS_AMD_FMT_MOD(attrs.modifier)<<std::endl;
+		//std::cout<<size<<std::endl;
+
+		uint32_t *data = nullptr;
+		data = static_cast<uint32_t*>(mmap(nullptr, size, PROT_READ, MAP_SHARED, attrs.fd[0], attrs.offset[0]));
+		if(data != MAP_FAILED)
+		{
+			//std::cout<<"mmap OK"<<std::endl;
+			munmap(data, size);
+		}
+		else
+		{
+			//std::cout<<"mmap failed: "<<strerror(errno)<<std::endl;
+		}
+	}*/
+
+	//std::cout<<"Locks: "<<intermediate->n_locks<<std::endl;

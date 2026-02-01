@@ -1,7 +1,10 @@
 #include "output.hpp"
+#include "server.hpp"
 
 void Output::frame_handler(struct wl_listener *listener, void *data)
 {
+	Output *self = container_of(listener, Output, frame_listener);
+
 	static struct timespec last;
 	struct timespec now;
 	clock_gettime(CLOCK_MONOTONIC, &now);
@@ -38,13 +41,13 @@ void Output::frame_handler(struct wl_listener *listener, void *data)
 	static unsigned int render_count = 0;
 	render_count++;
 	if(render_count == 200) render_count = 0;
-	Output *output=Output::listener_output_map[listener];
+
 	// frame
-	if(output->wlroots_output != data)
+	if(self->wlroots_output != data)
 	{
-		std::cout<<"output->wlroots_output != data, this should not happen"<<std::endl;
+		std::cout<<"self->wlroots_output != data, this should not happen"<<std::endl;
 		return;
 	}
 	//std::cout<<"vsync"<<std::endl;
-	output->frame_render();
+	self->frame_render();
 }

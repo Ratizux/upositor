@@ -1,13 +1,12 @@
 #include "output.hpp"
-
-std::unordered_map<wl_listener*, Output*> Output::listener_output_map;
+#include "server.hpp"
 
 Output::Output(Server *parent, struct wlr_output *wlr_output)
 {
-	this->parent=parent;
+	this->server=parent;
 	this->wlroots_output=wlr_output;
 
-	wlr_output_init_render(this->wlroots_output, this->parent->allocator, this->parent->renderer);
+	wlr_output_init_render(this->wlroots_output, this->server->allocator, this->server->renderer);
 
 	struct wlr_output_state state;
 	wlr_output_state_init(&state);
@@ -26,23 +25,25 @@ Output::Output(Server *parent, struct wlr_output *wlr_output)
 	wlr_scene_output_layout_add_output(parent->scene_output_layout, layout_output, scene_output);
 	*/
 
-	this->destroy_listener = new wl_listener;
-	this->frame_listener = new wl_listener;
-	Output::listener_output_map[this->destroy_listener] = this;
-	Output::listener_output_map[this->frame_listener] = this;
-
-	this->destroy_listener->notify = [](wl_listener *listener, void *data)
+	this->destroy_listener.notify = [](wl_listener *listener, void *data)
 	{
-		Output *output=Output::listener_output_map[listener];
-		output->parent->outputs.erase(output);
-		//
-		listener_output_map.erase(output->destroy_listener);
-		listener_output_map.erase(output->frame_listener);
+		Output *self=container_of(listener, Output, destroy_listener);
+		self->server->outputs.erase(self);
+		// To be implemented
 	};
-	wl_signal_add(&this->wlroots_output->events.destroy, this->destroy_listener);
+	wl_signal_add(&this->wlroots_output->events.destroy, &this->destroy_listener);
 
-	this->frame_listener->notify = Output::frame_handler;
-	wl_signal_add(&this->wlroots_output->events.frame, this->frame_listener);
+	this->frame_listener.notify = Output::frame_handler;
+	wl_signal_add(&this->wlroots_output->events.frame, &this->frame_listener);
+
+	this->request_state_listener.notify = [](wl_listener *listener, void *data)
+	{
+		// state such as output resolution
+		Output *self=container_of(listener, Output, request_state_listener);
+		auto *event = static_cast<wlr_output_event_request_state*>(data);
+		wlr_output_commit_state(self->wlroots_output, event->state);
+	};
+	wl_signal_add(&this->wlroots_output->events.request_state, &this->request_state_listener);
 
 	wlr_output_commit_state(wlr_output, &state);
 	wlr_output_state_finish(&state);
@@ -52,6 +53,5 @@ Output::Output(Server *parent, struct wlr_output *wlr_output)
 
 Output::~Output()
 {
-	delete this->destroy_listener;
-	delete this->frame_listener;
+	//
 }

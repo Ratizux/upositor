@@ -1,5 +1,4 @@
 #include "output.hpp"
-#include "outputsurface.hpp"
 #include <sys/mman.h>
 extern "C"
 {
@@ -14,14 +13,27 @@ void Output::frame_render()
 	struct timespec now;
 	clock_gettime(CLOCK_MONOTONIC, &now);
 
-	wlr_renderer *renderer = this->parent->renderer;
+	wlr_renderer *renderer = this->server->renderer;
 	if(renderer == nullptr) throw 1;
-	int width, height;
-	wlr_output_effective_resolution(this->wlroots_output, &width, &height);
+	int output_width, output_height;
+	wlr_output_effective_resolution(this->wlroots_output, &output_width, &output_height);
+	if((output_width&1) != 0)
+	{
+		// width could not be divided by 2
+		output_width--;
+	}
+	if((output_height&1) != 0)
+	{
+		// width could not be divided by 2
+		output_height--;
+	}
+	int render_width, render_height;
+	render_width = output_width/2;
+	render_height = output_height/2;
 
 	const wlr_drm_format *target_format = wlr_drm_format_set_get(wlr_output_get_primary_formats(this->wlroots_output, WLR_BUFFER_CAP_DMABUF), DRM_FORMAT_ABGR8888);
 
-	wlr_buffer *intermediate = wlr_allocator_create_buffer(this->parent->allocator, width, height, target_format);
+	wlr_buffer *intermediate = wlr_allocator_create_buffer(this->server->allocator, render_width, render_height, target_format);
 	//std::cout<<"Locks: "<<intermediate->n_locks<<std::endl;
 	//std::cout<<intermediate->width<<"x"<<intermediate->height<<std::endl;
 
@@ -29,33 +41,33 @@ void Output::frame_render()
 	this->render_surfaces_to_buffer(intermediate);
 
 	// tamper with the buffer
-	Scaler scaler(width/2, height/2);
+	Scaler scaler(render_width, render_height);
 	wlr_texture *intermediate_texture = wlr_texture_from_buffer(renderer, intermediate);
 	wlr_box read_box =
 	{
 		.x = 0,
 		.y = 0,
-		.width = width / 2,
-		.height = height / 2,
+		.width = render_width,
+		.height = render_height,
 	};
 	wlr_texture_read_pixels_options read_option =
 	{
 		.data = scaler.input,
 		.format = DRM_FORMAT_ABGR8888,
-		.stride = (unsigned)4*width/2,
+		.stride = (unsigned)4*render_width,
 		.dst_x = 0,
 		.dst_y = 0,
 		.src_box = read_box,
 	};
 	wlr_texture_read_pixels(intermediate_texture, &read_option);
-	scaler.scale();
+	scaler.scale_scale2x();
 
 	//wlr_texture_from_pixels;
 	wlr_texture_destroy(intermediate_texture); // this would unlock the intermediate buffer automatically
 	wlr_buffer_drop(intermediate);
 	//std::cout<<intermediate->n_locks<<std::endl;
 
-	wlr_texture *target_texture = wlr_texture_from_pixels(this->parent->renderer, DRM_FORMAT_ABGR8888, (unsigned)4*width, width, height, scaler.output);
+	wlr_texture *target_texture = wlr_texture_from_pixels(this->server->renderer, DRM_FORMAT_ABGR8888, (unsigned)4*output_width, output_width, output_height, scaler.output);
 
 	// OK, create texture from buffer and render to screen buffer
 	this->render_texture_to_output(target_texture);

@@ -5,7 +5,7 @@ void Output::render_texture_to_output(wlr_texture *texture)
 	int width, height;
 	wlr_output_effective_resolution(this->wlroots_output, &width, &height);
 
-	wlr_renderer *renderer = this->parent->renderer;
+	wlr_renderer *renderer = this->server->renderer;
 	if(renderer == nullptr) throw 1;
 
 	wlr_output_state state = {0};

@@ -13,4 +13,5 @@ public:
 	Scaler(int width, int height);
 	~Scaler();
 	void scale();
+	void scale_scale2x();
 };

@@ -27,7 +27,6 @@ add_executable(Main
     src/output_frame_render.cpp
     src/output_render_surfaces_to_buffer.cpp
     src/output_render_texture_to_output.cpp
-    src/outputsurface.cpp
     src/scaler.cpp
     src/server.cpp
     src/toplevel.cpp

@@ -28,6 +28,26 @@ Toplevel::Toplevel(Server *parent, wlr_xdg_toplevel *xdg_toplevel)
 		}
 	};
 	wl_signal_add(&wlroots_surface->events.commit, &this->commit_listener);
+
+	this->destory_listener.notify = [](wl_listener *listener, void *data)
+	{
+		Toplevel *self = container_of(listener, Toplevel, destory_listener);
+
+		wl_list_remove(&self->commit_listener.link);
+		wl_list_remove(&self->destory_listener.link);
+		wl_list_remove(&self->map_listener.link);
+		wl_list_remove(&self->request_move_listener.link);
+
+		self->server->toplevels.erase(self);
+	};
+	wl_signal_add(&wlroots_xdg_toplevel->events.destroy, &this->destory_listener);
+
+	this->request_move_listener.notify = [](wl_listener *listener, void *data)
+	{
+		//
+	};
+	wl_signal_add(&wlroots_xdg_toplevel->events.request_move, &this->request_move_listener);
+
 }
 
 void Toplevel::focus_kbd()

@@ -1,5 +1,4 @@
 #include "output.hpp"
-#include "outputsurface.hpp"
 #include "toplevel.hpp"
 
 void Output::render_surfaces_to_buffer(wlr_buffer *buffer)
@@ -7,7 +6,7 @@ void Output::render_surfaces_to_buffer(wlr_buffer *buffer)
 	struct timespec now;
 	clock_gettime(CLOCK_MONOTONIC, &now);
 
-	wlr_renderer *renderer = this->parent->renderer;
+	wlr_renderer *renderer = this->server->renderer;
 	if(renderer == nullptr) throw 1;
 
 	struct wlr_render_pass *pass = wlr_renderer_begin_buffer_pass(renderer, buffer, nullptr);
@@ -21,9 +20,8 @@ void Output::render_surfaces_to_buffer(wlr_buffer *buffer)
 		wlr_render_pass_add_rect(pass, &options);
 	}
 
-	//std::cout<<"Surfaces: "<<this->surfaces.size()<<std::endl;
-
-	for(auto toplevel:this->parent->toplevels)
+	std::cout<<"Toplevels: "<<this->server->toplevels.size()<<std::endl;
+	for(auto toplevel:this->server->toplevels)
 	{
 		if(toplevel->ready == false)
 		{

@@ -1,6 +1,5 @@
 #include "server.hpp"
 #include "output.hpp"
-#include "outputsurface.hpp"
 #include "keyboard.hpp"
 #include "toplevel.hpp"
 #include <cstddef>
@@ -10,6 +9,7 @@ extern "C"
 	#define static
 	#include <wayland/wayland-server-core.h>
 	#include <wlr/types/wlr_seat.h>
+	#include <wlr/backend/wayland.h>
 	#undef static
 }
 

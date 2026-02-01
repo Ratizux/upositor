@@ -1,7 +1,5 @@
 #include "keyboard.hpp"
 
-std::unordered_map<wl_listener*, Keyboard*> Keyboard::listener_self_map;
-
 Keyboard::Keyboard(Server *parent, wlr_input_device *device)
 {
 	this->server = parent;
@@ -18,14 +16,24 @@ Keyboard::Keyboard(Server *parent, wlr_input_device *device)
 	wlr_keyboard_set_repeat_info(wlroots_keyboard, 25, 600);
 	wlr_seat_set_keyboard(server->seat, wlroots_keyboard);
 
-	listener_self_map[&key_listener] = this;
 	key_listener.notify = [](wl_listener *listener, void *data)
 	{
+		// normal key
 		auto event=static_cast<wlr_keyboard_key_event*>(data);
-		Keyboard *keyboard = listener_self_map[listener];
-		auto &seat = keyboard->server->seat;
-		wlr_seat_set_keyboard(seat, keyboard->wlroots_keyboard);
+		Keyboard *self = container_of(listener, Keyboard, key_listener);
+		auto &seat = self->server->seat;
+		wlr_seat_set_keyboard(seat, self->wlroots_keyboard);
 		wlr_seat_keyboard_notify_key(seat, event->time_msec, event->keycode, event->state);
 	};
 	wl_signal_add(&wlroots_keyboard->events.key, &key_listener);
+
+	modifiers_listener.notify = [](wl_listener *listener, void *data)
+	{
+		Keyboard *self = container_of(listener, Keyboard, modifiers_listener);
+		auto &seat = self->server->seat;
+		auto &wlr_kbd = self->wlroots_keyboard;
+		wlr_seat_set_keyboard(seat, wlr_kbd);
+		wlr_seat_keyboard_notify_modifiers(seat, &wlr_kbd->modifiers);
+	};
+	wl_signal_add(&wlroots_keyboard->events.modifiers, &modifiers_listener);
 }

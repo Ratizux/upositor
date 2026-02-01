@@ -19,24 +19,36 @@ pkg_check_modules(WLROOTS REQUIRED IMPORTED_TARGET
     wlroots-0.19
 )
 
-add_executable(Main
-    src/keyboard.cpp
-    src/main.cpp
-    src/output.cpp
-    src/output_frame_handler.cpp
-    src/output_frame_render.cpp
-    src/output_render_surfaces_to_buffer.cpp
-    src/output_render_texture_to_output.cpp
-    src/scaler.cpp
-    src/server.cpp
-    src/toplevel.cpp
+add_library(upositor
+    src/compositor/keyboard.cpp
+    src/compositor/output.cpp
+    src/compositor/output_frame_handler.cpp
+    src/compositor/output_frame_render.cpp
+    src/compositor/output_render_surfaces_to_buffer.cpp
+    src/compositor/output_render_texture_to_output.cpp
+    src/compositor/scaler.cpp
+    src/compositor/scaler_scale2x.cpp
+    src/compositor/server.cpp
+    src/compositor/toplevel.cpp
 )
 
-target_include_directories(Main PRIVATE
+target_include_directories(upositor PUBLIC
+    ${PROJECT_SOURCE_DIR}/include
     ${WLROOTS_INCLUDE_DIRS}
     protocol
 )
-target_link_libraries(Main PRIVATE PkgConfig::WAYLAND PkgConfig::WLROOTS)
+
+add_executable(Main
+    src/main.cpp
+)
+
+target_include_directories(Main PRIVATE
+    ${PROJECT_SOURCE_DIR}/include
+    protocol
+)
+
+target_link_libraries(Main PRIVATE PkgConfig::WAYLAND PkgConfig::WLROOTS upositor)
+
 target_compile_options(Main PRIVATE
     #-fsanitize=undefined -fsanitize=address -fno-omit-frame-pointer
     -Wall

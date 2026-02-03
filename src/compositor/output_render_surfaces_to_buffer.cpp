@@ -17,11 +17,11 @@ void Output::render_surfaces_to_buffer(wlr_buffer *buffer)
 		struct wlr_render_rect_options options = {0};
 		options.box.width = 100;
 		options.box.height = 100;
-		options.color = { 0.3, 0.3, 0.3, 1.0 };
+		options.color = { 0.2, 0.4, 0.6, 1.0 };
 		wlr_render_pass_add_rect(pass, &options);
 	}
 
-	std::cout<<"Toplevels: "<<this->server->toplevels.size()<<std::endl;
+	//std::cout<<"Toplevels: "<<this->server->toplevels.size()<<std::endl;
 	for(auto toplevel:this->server->toplevels)
 	{
 		if(toplevel->ready == false)

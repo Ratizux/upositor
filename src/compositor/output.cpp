@@ -5,8 +5,9 @@
 
 Output::Output(Server *parent, struct wlr_output *wlr_output)
 {
-	this->server=parent;
-	this->wlroots_output=wlr_output;
+	this->server = parent;
+	this->interpolator = Interpolator(this->server);
+	this->wlroots_output = wlr_output;
 
 	wlr_output_init_render(this->wlroots_output, this->server->allocator, this->server->renderer);
 

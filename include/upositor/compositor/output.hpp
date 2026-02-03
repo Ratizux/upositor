@@ -1,6 +1,7 @@
 #pragma once
 
 #include <upositor/compositor/server.hpp>
+#include <upositor/compositor/interpolator.hpp>
 
 class OutputSurface;
 
@@ -25,6 +26,7 @@ public:
 	wlr_output *wlroots_output;
 	//
 	Server *server;
+	Interpolator interpolator;
 	Output(Server*,struct wlr_output*);
 	~Output();
 };

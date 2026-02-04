@@ -30,3 +30,5 @@ public:
 	Output(Server*,struct wlr_output*);
 	~Output();
 };
+
+static_assert(std::is_standard_layout<Output>::value, "non-standard layout: Output");

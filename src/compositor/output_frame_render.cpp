@@ -33,6 +33,9 @@ void Output::frame_render()
 	render_width = output_width/2;
 	render_height = output_height/2;
 
+	this->server->render_width = render_width;
+	this->server->render_height = render_height;
+
 	this->interpolator.new_size(render_width, render_height);
 
 	// don't touch output, render to an offscreen buffer

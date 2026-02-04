@@ -13,6 +13,7 @@ find_package(PkgConfig REQUIRED)
 pkg_check_modules(WAYLAND REQUIRED IMPORTED_TARGET
     wayland-client
     wayland-server
+    xkbcommon
 )
 
 pkg_check_modules(WLROOTS REQUIRED IMPORTED_TARGET
@@ -47,6 +48,10 @@ target_include_directories(upositor_compositor PUBLIC
     ${PROJECT_SOURCE_DIR}/include
     ${WLROOTS_INCLUDE_DIRS}
     protocol
+)
+
+target_compile_options(upositor_compositor PRIVATE
+    -Wall
 )
 
 add_executable(Main

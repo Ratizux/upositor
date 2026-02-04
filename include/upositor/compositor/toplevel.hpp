@@ -23,3 +23,5 @@ public:
 	//
 	bool ready=false;
 };
+
+static_assert(std::is_standard_layout<Toplevel>::value, "non-standard layout: Toplevel");

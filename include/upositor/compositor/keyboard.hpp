@@ -19,3 +19,5 @@ public:
 	Server *server;
 	Keyboard(Server*, wlr_input_device*);
 };
+
+static_assert(std::is_standard_layout<Keyboard>::value, "non-standard layout: Keyboard");

@@ -10,6 +10,8 @@ find_package(PkgConfig REQUIRED)
 # TODO allow custom prefix
 # set(ENV{PKG_CONFIG_PATH} "prefix/usr/lib64/pkgconfig:prefix/usr/share/pkgconfig")
 
+option(UPOSITOR_BUILD_DEMOS "Build demos" False)
+
 pkg_check_modules(WAYLAND REQUIRED IMPORTED_TARGET
     wayland-client
     wayland-server
@@ -22,6 +24,7 @@ pkg_check_modules(WLROOTS REQUIRED IMPORTED_TARGET
 
 add_library(upositor_interpolator
     src/interpolator/lanczos.cpp
+    src/interpolator/lanczos_xrgb8888.cpp
 )
 
 target_include_directories(upositor_interpolator PUBLIC
@@ -73,3 +76,26 @@ target_compile_options(Main PRIVATE
 target_link_options(Main PRIVATE
     # -fsanitize=undefined -fsanitize=address
 )
+
+if(UPOSITOR_BUILD_DEMOS)
+    pkg_check_modules(PNG REQUIRED IMPORTED_TARGET
+        libpng
+    )
+
+    add_executable(InterpolatorDemo
+        src/interpolator_demos.cpp
+    )
+
+    target_include_directories(InterpolatorDemo PRIVATE
+        ${PROJECT_SOURCE_DIR}/include
+    )
+
+    target_link_libraries(InterpolatorDemo PRIVATE
+        PkgConfig::PNG
+        upositor_interpolator
+    )
+
+    target_compile_options(InterpolatorDemo PRIVATE
+        -O3
+    )
+endif()

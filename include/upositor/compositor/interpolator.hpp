@@ -14,7 +14,7 @@ public:
 	void execute();
 	wlr_texture *write();
 private:
-	LanczosScaler *scaler;
+	LanczosScalerXRGB8888 *scaler;
 	Server *server;
 	int src_width, src_height;
 	int dest_width, dest_height;

@@ -8,23 +8,56 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS True)
 find_package(PkgConfig REQUIRED)
 
 # TODO allow custom prefix
-# set(ENV{PKG_CONFIG_PATH} "prefix/usr/lib64/pkgconfig:prefix/usr/share/pkgconfig")
+set(ENV{PKG_CONFIG_PATH} "prefix/usr/lib64/pkgconfig:prefix/usr/share/pkgconfig")
+set(CMAKE_PREFIX_PATH "prefix/usr/")
 
 option(UPOSITOR_BUILD_COMPOSITOR "Build compositor" True)
 option(UPOSITOR_BUILD_DEMOS "Build demos" False)
+option(UPOSITOR_ENABLE_NN "Enable neural network features" False)
+
+add_library(upositor_base INTERFACE)
+target_include_directories(upositor_base INTERFACE
+    ${PROJECT_SOURCE_DIR}/include
+)
 
 add_library(upositor_interpolator
     src/interpolator/lanczos.cpp
     src/interpolator/lanczos_xrgb8888.cpp
 )
 
-target_include_directories(upositor_interpolator PUBLIC
-    ${PROJECT_SOURCE_DIR}/include
+target_link_libraries(upositor_interpolator PUBLIC
+    upositor_base
 )
 
 target_compile_options(upositor_interpolator PRIVATE
     -Wall -O3
 )
+
+if(UPOSITOR_ENABLE_NN)
+    pkg_check_modules(NCNN REQUIRED IMPORTED_TARGET
+        ncnn
+    )
+    find_package(OpenMP REQUIRED)
+    find_package(glslang REQUIRED)
+
+    add_library(upositor_nn INTERFACE)
+    target_link_libraries(upositor_nn INTERFACE
+        PkgConfig::NCNN
+        OpenMP::OpenMP_CXX
+    )
+    target_compile_definitions(upositor_nn INTERFACE
+        UPOSITOR_ENABLE_NN
+    )
+    target_compile_options(upositor_nn INTERFACE
+        ${OpenMP_CXX_FLAGS}
+    )
+
+    target_link_libraries(upositor_interpolator INTERFACE
+        upositor_nn
+        glslang::glslang
+    )
+
+endif()
 
 if(UPOSITOR_BUILD_COMPOSITOR)
     pkg_check_modules(WAYLAND REQUIRED IMPORTED_TARGET
@@ -50,9 +83,13 @@ if(UPOSITOR_BUILD_COMPOSITOR)
     )
 
     target_include_directories(upositor_compositor PUBLIC
-        ${PROJECT_SOURCE_DIR}/include
-        ${WLROOTS_INCLUDE_DIRS}
         protocol
+    )
+
+    target_link_libraries(upositor_compositor PUBLIC
+        PkgConfig::WAYLAND
+        PkgConfig::WLROOTS
+        upositor_base
     )
 
     target_compile_options(upositor_compositor PRIVATE
@@ -63,12 +100,7 @@ if(UPOSITOR_BUILD_COMPOSITOR)
         src/main.cpp
     )
 
-    target_include_directories(Main PRIVATE
-        ${PROJECT_SOURCE_DIR}/include
-        protocol
-    )
-
-    target_link_libraries(Main PRIVATE PkgConfig::WAYLAND PkgConfig::WLROOTS upositor_compositor upositor_interpolator)
+    target_link_libraries(Main PRIVATE upositor_compositor upositor_interpolator)
 
     target_compile_options(Main PRIVATE
         # -fsanitize=undefined -fsanitize=address -fno-omit-frame-pointer
@@ -87,10 +119,6 @@ if(UPOSITOR_BUILD_DEMOS)
 
     add_executable(InterpolatorDemo
         src/interpolator_demos.cpp
-    )
-
-    target_include_directories(InterpolatorDemo PRIVATE
-        ${PROJECT_SOURCE_DIR}/include
     )
 
     target_link_libraries(InterpolatorDemo PRIVATE

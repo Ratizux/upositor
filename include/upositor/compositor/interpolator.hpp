@@ -2,6 +2,7 @@
 
 #include <upositor/compositor/server.hpp>
 #include <upositor/interpolator/lanczos.hpp>
+#include <upositor/interpolator/nn.hpp>
 
 class Interpolator
 {
@@ -14,7 +15,11 @@ public:
 	void execute();
 	wlr_texture *write();
 private:
+	#ifdef UPOSITOR_ENABLE_NN
+	NN_ScalerXRGB8888 *scaler;
+	#else
 	LanczosScalerXRGB8888 *scaler;
+	#endif
 	Server *server;
 	int src_width, src_height;
 	int dest_width, dest_height;

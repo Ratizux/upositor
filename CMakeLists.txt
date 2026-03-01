@@ -8,8 +8,8 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS True)
 find_package(PkgConfig REQUIRED)
 
 # TODO allow custom prefix
-set(ENV{PKG_CONFIG_PATH} "prefix/usr/lib64/pkgconfig:prefix/usr/share/pkgconfig")
-set(CMAKE_PREFIX_PATH "prefix/usr/")
+# set(ENV{PKG_CONFIG_PATH} "prefix/usr/lib64/pkgconfig:prefix/usr/share/pkgconfig")
+# set(CMAKE_PREFIX_PATH "prefix/usr/")
 
 option(UPOSITOR_BUILD_COMPOSITOR "Build compositor" True)
 option(UPOSITOR_BUILD_DEMOS "Build demos" False)
@@ -23,6 +23,7 @@ target_include_directories(upositor_base INTERFACE
 add_library(upositor_interpolator
     src/interpolator/lanczos.cpp
     src/interpolator/lanczos_xrgb8888.cpp
+    src/interpolator/nn_xrgb8888.cpp
 )
 
 target_link_libraries(upositor_interpolator PUBLIC
@@ -45,18 +46,15 @@ if(UPOSITOR_ENABLE_NN)
         PkgConfig::NCNN
         OpenMP::OpenMP_CXX
     )
-    target_compile_definitions(upositor_nn INTERFACE
-        UPOSITOR_ENABLE_NN
-    )
+    add_definitions(-DUPOSITOR_ENABLE_NN)
     target_compile_options(upositor_nn INTERFACE
         ${OpenMP_CXX_FLAGS}
     )
 
-    target_link_libraries(upositor_interpolator INTERFACE
+    target_link_libraries(upositor_interpolator PUBLIC
         upositor_nn
         glslang::glslang
     )
-
 endif()
 
 if(UPOSITOR_BUILD_COMPOSITOR)
@@ -128,5 +126,6 @@ if(UPOSITOR_BUILD_DEMOS)
 
     target_compile_options(InterpolatorDemo PRIVATE
         -O3
+    )
     )
 endif()

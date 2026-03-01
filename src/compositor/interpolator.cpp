@@ -1,4 +1,5 @@
-#include "upositor/interpolator/lanczos.hpp"
+#include <upositor/interpolator/lanczos.hpp>
+#include <upositor/interpolator/nn.hpp>
 #include <upositor/compositor/interpolator.hpp>
 #include <cassert>
 
@@ -79,7 +80,11 @@ void Interpolator::new_size(int new_src_width, int new_src_height)
 	{
 		delete this->scaler;
 	}
+	#ifdef UPOSITOR_ENABLE_NN
+	this->scaler = new NN_ScalerXRGB8888(this->src_width, this->src_height);
+	#else
 	this->scaler = new LanczosScalerXRGB8888(this->src_width, this->src_height);
+	#endif
 }
 
 wlr_texture* Interpolator::write()

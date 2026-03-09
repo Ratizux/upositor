@@ -7,7 +7,7 @@
 
 extern "C"
 {
-	#include <wayland/wayland-server-core.h>
+	#include <wayland-server-core.h>
 	// wlroots: we do not support C++, because fuck you
 	// https://gitlab.freedesktop.org/wlroots/wlroots/-/issues/682
 	#define static

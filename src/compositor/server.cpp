@@ -9,7 +9,7 @@
 extern "C"
 {
 	#define static
-	#include <wayland/wayland-server-core.h>
+	#include <wayland-server-core.h>
 	#include <wlr/types/wlr_seat.h>
 	#include <wlr/types/wlr_subcompositor.h>
 	#include <wlr/backend/wayland.h>

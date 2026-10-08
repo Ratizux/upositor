@@ -28,7 +28,7 @@ private:
 	ncnn::VkAllocator *blob_vkallocator = nullptr;
 	ncnn::VkAllocator *staging_vkallocator = nullptr;
 
-	constexpr static bool use_gpu = true;
+	constexpr static bool use_gpu = false;
 };
 
 template <typename View>
@@ -53,6 +53,12 @@ NN_Scaler<View>::NN_Scaler(int width, int height)
 		srnet.opt.blob_vkallocator = blob_vkallocator;
 		srnet.opt.staging_vkallocator = staging_vkallocator;
 		srnet.opt.workspace_vkallocator = blob_vkallocator;
+	}
+	else
+	{
+		srnet.opt.use_int8_inference = true;
+		srnet.opt.use_winograd_convolution = true;
+		srnet.opt.use_sgemm_convolution = true;
 	}
 	// TODO
 	/*

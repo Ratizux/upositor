@@ -8,8 +8,8 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS True)
 find_package(PkgConfig REQUIRED)
 
 # TODO allow custom prefix
-# set(ENV{PKG_CONFIG_PATH} "prefix/usr/lib64/pkgconfig:prefix/usr/share/pkgconfig")
-# set(CMAKE_PREFIX_PATH "prefix/usr/")
+set(ENV{PKG_CONFIG_PATH} "prefix/usr/lib64/pkgconfig:prefix/usr/share/pkgconfig")
+set(CMAKE_PREFIX_PATH "prefix/usr/")
 
 option(UPOSITOR_BUILD_COMPOSITOR "Build compositor" True)
 option(UPOSITOR_BUILD_DEMOS "Build demos" False)
@@ -125,7 +125,11 @@ if(UPOSITOR_BUILD_DEMOS)
     )
 
     target_compile_options(InterpolatorDemo PRIVATE
+        #-fsanitize=undefined -fsanitize=address
         -O3
     )
+
+    target_link_options(InterpolatorDemo PRIVATE
+        # -fsanitize=undefined -fsanitize=address
     )
 endif()
